@@ -39,10 +39,7 @@ float avgOut;
 Servo servo;
 
 //Declare PID values
-double input, setpoint, output;
-
-PID myPID(&input, &output, &setpoint, KP, KI, KD, DIRECT);
-
+double input, output;
 
 void setup() {
   Wire.begin();             //Initialize I2C communication
@@ -63,11 +60,8 @@ void setup() {
   }
   
   cal_mpu();                //Calibrate gyroscope
-  setpoint = 0;
-  output = 90;
-  myPID.SetOutputLimits(35,105);
-  myPID.SetMode(AUTOMATIC);
   digitalWrite(13, LOW); 
+  initPID();
   loop_timer = micros();    //Initialize loop timer
 }
 
@@ -75,13 +69,13 @@ void loop() {
   read_mpu();                   //Read data
   process_mpu();                //Process data
   input = angle_pitch_output;   //Input into PID loop
-  myPID.Compute();              //Compute output
+  computePID();              //Compute output
 
   calc_avg();                   //Output averaging
    
   servo.write((int)(avgOut));   //Write output to servo
   avgOut = 0;
-  printValues();                //Print values to serial
+  //printValues();                //Print values to serial
 
   while(micros() - loop_timer < 4000);  //Constrain each loop to 4000us long for 250Hz refresh rate
   loop_timer = micros();                //Update the loop timer
@@ -103,7 +97,7 @@ void calc_avg(){
     avgOut += outputAvg[i];
   }
   avgOut = avgOut/NUM_AVG;                //Average by dividing number of elements
-  Serial.print((int) avgOut);
-  Serial.print("-");
+  //Serial.print((int) avgOut);
+  //Serial.print("-");
 }
 

@@ -5,7 +5,7 @@
 
 //Adjustable parameters
 #define IMU_ADDR 0x68
-#define NUM_CAL  2000
+#define NUM_CAL  500
 
 void init_mpu(){                    //Sets registers to initialize MPU6050
   Wire.beginTransmission(IMU_ADDR); //Initialize I2C communication
