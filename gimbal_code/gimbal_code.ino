@@ -1,8 +1,13 @@
 /*
- * Davis Drone Club Gimbal v1.3 firmware
+ * Davis Drone Club Gimbal v1.3.1 firmware
+ * 
+ * Serial Connection Branch
+ * This is untested software
  * 
  * CHANGELOG
- * - Changed PID tuning values from variables to definitions
+ * - Reverted PID tunings from definitions to variables
+ * - Added data output through serial port
+ * - Changed bauderate to 115200
  * 
  * PID_v1 library can be downloaded from here: https://github.com/br3ttb/Arduino-PID-Library
  * Based on code from http://www.brokking.net/imu.html
@@ -13,12 +18,12 @@
 #include <Servo.h>
 
 //NUMBER OF POINTS TO AVERAGE IN OUTPUT AVERAGING
-#define NUM_AVG 3
+#define NUM_AVG 1
 
 //PID TUNING VALUES- TUNE THE PID LOOP HERE
-#define KP 0.015
-#define KI 6.000
-#define KD 0.020
+double kp = 0.05;
+double ki = 1;
+double kd = 0;
 
 //Declaring  global variables
 int gyro_x, gyro_y, gyro_z;
@@ -41,12 +46,15 @@ Servo servo;
 //Declare PID values
 double input, setpoint, output;
 
-PID myPID(&input, &output, &setpoint, KP, KI, KD, DIRECT);
+PID myPID(&input, &output, &setpoint, kp, ki, kd, DIRECT);
 
+//Variables for data output
+String dataString = "DATA;";
+String dataDelim  = ",";
 
 void setup() {
   Wire.begin();             //Initialize I2C communication
-  Serial.begin(57600);      //Initialize serial communication at 115200
+  Serial.begin(115200);      //Initialize serial communication at 115200
 
   pinMode(13, OUTPUT);      //Set pinmode of LED pin to output
   
@@ -65,7 +73,7 @@ void setup() {
   cal_mpu();                //Calibrate gyroscope
   setpoint = 0;
   output = 90;
-  myPID.SetOutputLimits(35,105);
+  myPID.SetOutputLimits(10,95);
   myPID.SetMode(AUTOMATIC);
   digitalWrite(13, LOW); 
   loop_timer = micros();    //Initialize loop timer
@@ -81,16 +89,15 @@ void loop() {
    
   servo.write((int)(avgOut));   //Write output to servo
   avgOut = 0;
-  printValues();                //Print values to serial
+  printData(angle_pitch_output, millis());                //Print values to serial
 
   while(micros() - loop_timer < 4000);  //Constrain each loop to 4000us long for 250Hz refresh rate
   loop_timer = micros();                //Update the loop timer
 }
 
-void printValues(){
-  Serial.print(angle_pitch_output);
-  Serial.print("-");
-  Serial.println(angle_roll_output);
+void printData(float angle, unsigned long currTime){
+  String printStr = dataString + angle + dataDelim + currTime;
+  Serial.println(printStr);
 }
 
 void calc_avg(){
