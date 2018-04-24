@@ -5,7 +5,7 @@
 
 //Adjustable parameters
 #define IMU_ADDR 0x68
-#define NUM_CAL  2000
+#define NUM_CAL  500
 
 void init_mpu(){                    //Sets registers to initialize MPU6050
   Wire.beginTransmission(IMU_ADDR); //Initialize I2C communication
@@ -42,7 +42,7 @@ void read_mpu(){                        //Subroutine for reading the raw gyro an
 
 void cal_mpu(){                                         //Subroutine for callibrating MPU6050
   for (int cal_int = 0; cal_int < NUM_CAL ; cal_int ++){   //Iterate 2000 times
-    if(cal_int % 125 == 0)Serial.print(".");            //Print a dot every 125 readings
+    //if(cal_int % 125 == 0)Serial.print(".");            //Print a dot every 125 readings
     read_mpu();                                         //Read the raw acc and gyro data from the MPU-6050
     gyro_x_cal += gyro_x;                               //Add the gyro x-axis offset to the gyro_x_cal variable
     gyro_y_cal += gyro_y;                               //Add the gyro y-axis offset to the gyro_y_cal variable
@@ -80,8 +80,8 @@ void process_mpu(){
 
   //Combine gyroscope and accelerometer readings to correct for drift
   if(set_gyro_angles){
-    angle_pitch = angle_pitch * 0.99 + angle_pitch_acc * 0.01; 
-    angle_roll = angle_roll * 0.99 + angle_roll_acc * 0.01;     
+    angle_pitch = angle_pitch * 0.9 + angle_pitch_acc * 0.1; 
+    angle_roll = angle_roll * 0.9 + angle_roll_acc * 0.1;     
   }
   else{   //Initialize values if first loop
     angle_pitch = angle_pitch_acc;
@@ -90,8 +90,8 @@ void process_mpu(){
   }
 
   //Complementary filter
-  angle_pitch_output = angle_pitch_output * 0.9 + angle_pitch * 0.1;   //Take 90% of the output pitch value and add 10% of the raw pitch value
-  angle_roll_output  = angle_roll_output  * 0.9 + angle_roll  * 0.1;   //Take 90% of the output roll value and add 10% of the raw roll value
+  angle_pitch_output = angle_pitch_output * 0.8 + angle_pitch * 0.2;   //Take 90% of the output pitch value and add 10% of the raw pitch value
+  angle_roll_output  = angle_roll_output  * 0.8 + angle_roll  * 0.2;   //Take 90% of the output roll value and add 10% of the raw roll value
 
 }
 

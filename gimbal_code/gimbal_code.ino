@@ -1,13 +1,12 @@
 /*
- * Davis Drone Club Gimbal v1.3.1 firmware
+ * Davis Drone Club Gimbal v1.4 firmware
  * 
  * Serial Connection Branch
  * This is untested software
  * 
  * CHANGELOG
- * - Reverted PID tunings from definitions to variables
- * - Added data output through serial port
- * - Changed bauderate to 115200
+ * - Reverted bauderate to 9600
+ * - Added responses for tuning via serial monitor
  * 
  * PID_v1 library can be downloaded from here: https://github.com/br3ttb/Arduino-PID-Library
  * Based on code from http://www.brokking.net/imu.html
@@ -21,9 +20,9 @@
 #define NUM_AVG 1
 
 //PID TUNING VALUES- TUNE THE PID LOOP HERE
-double kp = 0.05;
-double ki = 1;
-double kd = 0;
+double kp = 0.8;
+double ki = 0.6;
+double kd = 0.005;
 
 //Declaring  global variables
 int gyro_x, gyro_y, gyro_z;
@@ -40,6 +39,13 @@ float angle_pitch_output, angle_roll_output;
 float outputAvg[NUM_AVG];
 float avgOut;
 
+String inString;                //Stores converted input
+String parse_head, parse_data;  //Splits input into head and data
+int delimIndex;                 //Index of delimiter within string
+String tuneP = "TUNEP";         //Header content for tuning packet
+String tuneI = "TUNEI";         //Header content for tuning packet
+String tuneD = "TUNED";         //Header content for tuning packet
+
 //Declaring servo object
 Servo servo;
 
@@ -47,14 +53,13 @@ Servo servo;
 double input, setpoint, output;
 
 PID myPID(&input, &output, &setpoint, kp, ki, kd, DIRECT);
-
 //Variables for data output
 String dataString = "DATA;";
 String dataDelim  = ",";
 
 void setup() {
   Wire.begin();             //Initialize I2C communication
-  Serial.begin(115200);      //Initialize serial communication at 115200
+  Serial.begin(9600);      //Initialize serial communication at 9600
 
   pinMode(13, OUTPUT);      //Set pinmode of LED pin to output
   
@@ -75,6 +80,8 @@ void setup() {
   output = 90;
   myPID.SetOutputLimits(10,95);
   myPID.SetMode(AUTOMATIC);
+  myPID.SetControllerDirection(REVERSE);
+
   digitalWrite(13, LOW); 
   loop_timer = micros();    //Initialize loop timer
 }
@@ -87,10 +94,41 @@ void loop() {
 
   calc_avg();                   //Output averaging
    
-  servo.write((int)(avgOut));   //Write output to servo
+  servo.write((int)(output));   //Write output to servo
   avgOut = 0;
-  printData(angle_pitch_output, millis());                //Print values to serial
+  //printData(angle_pitch_output, millis());                //Print values to serial
 
+  if(Serial.available()>0){
+    inString = "";
+    while(Serial.available()>0){
+      inString+= char(Serial.read());
+    }
+
+    delimIndex = inString.indexOf(';');
+    parse_head = inString.substring(0,delimIndex);
+    parse_data = inString.substring(delimIndex + 1);
+
+    if(parse_head == tuneP)
+    {
+      processTune(parse_data, 'P');
+    }
+    else if(parse_head == tuneI)
+    {
+      processTune(parse_data, 'I');
+    }
+    else if(parse_head == tuneD)
+    {
+      processTune(parse_data, 'D');
+    }
+    else
+    {
+      //Serial.println("WARN;COMMAND NOT RECOGNIZED");
+    }
+  }
+  if(micros()-loop_timer < 4000)
+  {
+    Serial.println("WARN;LOOP TIME EXCEEDED");
+  }
   while(micros() - loop_timer < 4000);  //Constrain each loop to 4000us long for 250Hz refresh rate
   loop_timer = micros();                //Update the loop timer
 }
@@ -110,7 +148,24 @@ void calc_avg(){
     avgOut += outputAvg[i];
   }
   avgOut = avgOut/NUM_AVG;                //Average by dividing number of elements
-  Serial.print((int) avgOut);
-  Serial.print("-");
+}
+
+void processTune(String data, char mode){
+  if(mode == 'P')
+  {
+    kp = data.toDouble();
+    myPID.SetTunings(kp, ki, kd);
+  }
+  else if(mode == 'I')
+  {
+    ki = data.toDouble();
+    myPID.SetTunings(kp, ki, kd);
+  }
+  else if(mode == 'D')
+  {
+    kd = data.toDouble();
+    myPID.SetTunings(kp, ki, kd);
+  }
+  Serial.println("TUNING UPDATE RECEIVED");
 }
 
