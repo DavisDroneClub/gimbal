@@ -10,8 +10,6 @@
  * 
  * PID_v1 library can be downloaded from here: https://github.com/br3ttb/Arduino-PID-Library
  * Based on code from http://www.brokking.net/imu.html
- * 
- * Kalman filter library can be downloaded here: https://github.com/TKJElectronics/KalmanFilter
  */
 
 #include <Wire.h>
@@ -19,27 +17,33 @@
 #include <Servo.h>
 
 //NUMBER OF POINTS TO AVERAGE IN OUTPUT AVERAGING
-#define NUM_AVG 5
+#define NUM_AVG 3
+
+#include <Wire.h>
+#include "Kalman.h" // Source: https://github.com/TKJElectronics/KalmanFilter
+
+#define RESTRICT_PITCH // Comment out to restrict roll to ±90deg instead - please read: http://www.freescale.com/files/sensors/doc/app_note/AN3461.pdf
+
+Kalman kalmanX; // Create the Kalman instances
+Kalman kalmanY;
+
+/* IMU Data */
+double accX, accY, accZ;
+double gyroX, gyroY, gyroZ;
+int16_t tempRaw;
+
+double gyroXangle, gyroYangle; // Angle calculate using the gyro only
+double compAngleX, compAngleY; // Calculated angle using a complementary filter
+double kalAngleX, kalAngleY; // Calculated angle using a Kalman filter
+
+uint32_t timer;
+uint8_t i2cData[14]; // Buffer for I2C data
 
 //PID TUNING VALUES- TUNE THE PID LOOP HERE
 double kp = 0.2;
 double ki = 5.5;
 double kd = 0.00001;
 
-//Declaring  global variables
-int gyro_x, gyro_y, gyro_z;
-long acc_x, acc_y, acc_z, acc_total_vector;
-int temp;
-long gyro_x_cal, gyro_y_cal, gyro_z_cal;
-long loop_timer;
-float angle_pitch, angle_roll;
-int angle_pitch_buffer, angle_roll_buffer;
-boolean set_gyro_angles;
-float angle_roll_acc, angle_pitch_acc;
-float angle_pitch_output, angle_roll_output;
-
-float outputAvg[NUM_AVG];
-float avgOut;
 
 String inString;                //Stores converted input
 String parse_head, parse_data;  //Splits input into head and data
@@ -59,53 +63,143 @@ PID myPID(&input, &output, &setpoint, kp, ki, kd, DIRECT);
 String dataString = "DATA;";
 String dataDelim  = ",";
 
+int loop_timer;
+
 void setup() {
   Wire.begin();             //Initialize I2C communication
   Serial.begin(115200);      //Initialize serial communication at 9600
 
-  pinMode(13, OUTPUT);      //Set pinmode of LED pin to output
+TWBR = ((F_CPU / 400000L) - 16) / 2; // Set I2C frequency to 400kHz
+
+  i2cData[0] = 7; // Set the sample rate to 1000Hz - 8kHz/(7+1) = 1000Hz
+  i2cData[1] = 0x00; // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
+  i2cData[2] = 0x00; // Set Gyro Full Scale Range to ±250deg/s
+  i2cData[3] = 0x00; // Set Accelerometer Full Scale Range to ±2g
+  while (i2cWrite(0x19, i2cData, 4, false)); // Write to all four registers at once
+  while (i2cWrite(0x6B, 0x01, true)); // PLL with X axis gyroscope reference and disable sleep mode
+
+  while (i2cRead(0x75, i2cData, 1));
+  if (i2cData[0] != 0x68) { // Read "WHO_AM_I" register
+    Serial.print(F("Error reading sensor"));
+    while (1);
+  }
+
+  delay(100); // Wait for sensor to stabilize
+
+  /* Set kalman and gyro starting angle */
+  while (i2cRead(0x3B, i2cData, 6));
+  accX = (i2cData[0] << 8) | i2cData[1];
+  accY = (i2cData[2] << 8) | i2cData[3];
+  accZ = (i2cData[4] << 8) | i2cData[5];
+
+  // Source: http://www.freescale.com/files/sensors/doc/app_note/AN3461.pdf eq. 25 and eq. 26
+  // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
+  // It is then converted from radians to degrees
+#ifdef RESTRICT_PITCH // Eq. 25 and 26
+  double roll  = atan2(accY, accZ) * RAD_TO_DEG;
+  double pitch = atan(-accX / sqrt(accY * accY + accZ * accZ)) * RAD_TO_DEG;
+#else // Eq. 28 and 29
+  double roll  = atan(accY / sqrt(accX * accX + accZ * accZ)) * RAD_TO_DEG;
+  double pitch = atan2(-accX, accZ) * RAD_TO_DEG;
+#endif
+
+  kalmanX.setAngle(roll); // Set starting angle
+  kalmanY.setAngle(pitch);
+  gyroXangle = roll;
+  gyroYangle = pitch;
+  compAngleX = roll;
+  compAngleY = pitch;
   
   servo.attach(3);          //Declare servo output pin
-  servo.write(90);          //Initialize to 70
+  servo.write(70);          //Initialize to 70
   delay(1000);
 
-  init_mpu();               //Initialize MPU6050 registers
-
-  digitalWrite(13, HIGH);   //Turn on LED
-
-  for(int i = 0; i < NUM_AVG - 1; i++){     //Initialize the output average array
-    outputAvg[i] = 90;
-  }
-  
-  cal_mpu();                //Calibrate gyroscope
   setpoint = 0;
   output = 90;
   myPID.SetOutputLimits(50,130);
   myPID.SetMode(AUTOMATIC);
   myPID.SetControllerDirection(REVERSE);  //DIRECT for normal mounting, REVERSE for inverted
 
-  digitalWrite(13, LOW); 
-  loop_timer = micros();    //Initialize loop timer
+  timer = micros();
 }
 
 void loop() {
-  read_mpu();                   //Read data
-  process_mpu();                //Process data
-  input = angle_pitch_output;   //Input into PID loop
+  /* Update all the values */
+  while (i2cRead(0x3B, i2cData, 14));
+  accX = ((i2cData[0] << 8) | i2cData[1]);
+  accY = ((i2cData[2] << 8) | i2cData[3]);
+  accZ = ((i2cData[4] << 8) | i2cData[5]);
+  tempRaw = (i2cData[6] << 8) | i2cData[7];
+  gyroX = (i2cData[8] << 8) | i2cData[9];
+  gyroY = (i2cData[10] << 8) | i2cData[11];
+  gyroZ = (i2cData[12] << 8) | i2cData[13];
 
-  calc_avg();                   //Output averaging
+  double dt = (double)(micros() - timer) / 1000000; // Calculate delta time
+  timer = micros();
+#ifdef RESTRICT_PITCH // Eq. 25 and 26
+  double roll  = atan2(accY, accZ) * RAD_TO_DEG;
+  double pitch = atan(-accX / sqrt(accY * accY + accZ * accZ)) * RAD_TO_DEG;
+#else // Eq. 28 and 29
+  double roll  = atan(accY / sqrt(accX * accX + accZ * accZ)) * RAD_TO_DEG;
+  double pitch = atan2(-accX, accZ) * RAD_TO_DEG;
+#endif
+
+  double gyroXrate = gyroX / 131.0; // Convert to deg/s
+  double gyroYrate = gyroY / 131.0; // Convert to deg/s
+#ifdef RESTRICT_PITCH
+  // This fixes the transition problem when the accelerometer angle jumps between -180 and 180 degrees
+  if ((roll < -90 && kalAngleX > 90) || (roll > 90 && kalAngleX < -90)) {
+    kalmanX.setAngle(roll);
+    compAngleX = roll;
+    kalAngleX = roll;
+    gyroXangle = roll;
+  } else
+    kalAngleX = kalmanX.getAngle(roll, gyroXrate, dt); // Calculate the angle using a Kalman filter
+
+  if (abs(kalAngleX) > 90)
+    gyroYrate = -gyroYrate; // Invert rate, so it fits the restriced accelerometer reading
+  kalAngleY = kalmanY.getAngle(pitch, gyroYrate, dt);
+#else
+  // This fixes the transition problem when the accelerometer angle jumps between -180 and 180 degrees
+  if ((pitch < -90 && kalAngleY > 90) || (pitch > 90 && kalAngleY < -90)) {
+    kalmanY.setAngle(pitch);
+    compAngleY = pitch;
+    kalAngleY = pitch;
+    gyroYangle = pitch;
+  } else
+    kalAngleY = kalmanY.getAngle(pitch, gyroYrate, dt); // Calculate the angle using a Kalman filter
+
+  if (abs(kalAngleY) > 90)
+    gyroXrate = -gyroXrate; // Invert rate, so it fits the restriced accelerometer reading
+  kalAngleX = kalmanX.getAngle(roll, gyroXrate, dt); // Calculate the angle using a Kalman filter
+#endif
+
+  gyroXangle += gyroXrate * dt; // Calculate gyro angle without any filter
+  gyroYangle += gyroYrate * dt;
+  //gyroXangle += kalmanX.getRate() * dt; // Calculate gyro angle using the unbiased rate
+  //gyroYangle += kalmanY.getRate() * dt;
+
+  compAngleX = 0.93 * (compAngleX + gyroXrate * dt) + 0.07 * roll; // Calculate the angle using a Complimentary filter
+  compAngleY = 0.93 * (compAngleY + gyroYrate * dt) + 0.07 * pitch;
+
+  // Reset the gyro angle when it has drifted too much
+  if (gyroXangle < -180 || gyroXangle > 180)
+    gyroXangle = kalAngleX;
+  if (gyroYangle < -180 || gyroYangle > 180)
+    gyroYangle = kalAngleY;
   
-  if(abs(input-setpoint) < 3)
+  input = kalAngleX;   //Input into PID loop
+  if(abs(input) < 2.75)
   {
-    input = setpoint;
+    input = 0;
   }
   else
   {
     servo.write((int)(output));   //Write output to servo
-  }   
+  }
   myPID.Compute();              //Compute output
-  avgOut = 0;
-  printData(angle_pitch_output, millis());                //Print values to serial
+   
+  printData(kalAngleX, millis());                //Print values to serial
 
   if(Serial.available()>0){
     inString = "";
@@ -145,18 +239,6 @@ void loop() {
 void printData(float angle, unsigned long currTime){
   String printStr = dataString + angle + dataDelim + currTime;
   Serial.println(printStr);
-}
-
-void calc_avg(){
-  for(int i = 0; i < NUM_AVG - 1; i++){   //Shift element arrays down 1 index
-    outputAvg[i] = outputAvg[i+1];  
-  }
-  outputAvg[NUM_AVG-1] = output;          //Update last element of array
-
-  for(int i = 0; i <= (NUM_AVG-1); i++){  //Sum all elements of array
-    avgOut += outputAvg[i];
-  }
-  avgOut = avgOut/NUM_AVG;                //Average by dividing number of elements
 }
 
 void processTune(String data, char mode){
