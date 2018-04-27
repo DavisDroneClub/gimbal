@@ -10,6 +10,8 @@
  * 
  * PID_v1 library can be downloaded from here: https://github.com/br3ttb/Arduino-PID-Library
  * Based on code from http://www.brokking.net/imu.html
+ * 
+ * Kalman filter library can be downloaded here: https://github.com/TKJElectronics/KalmanFilter
  */
 
 #include <Wire.h>
@@ -17,12 +19,12 @@
 #include <Servo.h>
 
 //NUMBER OF POINTS TO AVERAGE IN OUTPUT AVERAGING
-#define NUM_AVG 1
+#define NUM_AVG 5
 
 //PID TUNING VALUES- TUNE THE PID LOOP HERE
-double kp = 0.8;
-double ki = 0.6;
-double kd = 0.005;
+double kp = 0.2;
+double ki = 5.5;
+double kd = 0.00001;
 
 //Declaring  global variables
 int gyro_x, gyro_y, gyro_z;
@@ -59,12 +61,12 @@ String dataDelim  = ",";
 
 void setup() {
   Wire.begin();             //Initialize I2C communication
-  Serial.begin(9600);      //Initialize serial communication at 9600
+  Serial.begin(115200);      //Initialize serial communication at 9600
 
   pinMode(13, OUTPUT);      //Set pinmode of LED pin to output
   
   servo.attach(3);          //Declare servo output pin
-  servo.write(70);          //Initialize to 70
+  servo.write(90);          //Initialize to 70
   delay(1000);
 
   init_mpu();               //Initialize MPU6050 registers
@@ -72,15 +74,15 @@ void setup() {
   digitalWrite(13, HIGH);   //Turn on LED
 
   for(int i = 0; i < NUM_AVG - 1; i++){     //Initialize the output average array
-    outputAvg[i] = 70;
+    outputAvg[i] = 90;
   }
   
   cal_mpu();                //Calibrate gyroscope
   setpoint = 0;
   output = 90;
-  myPID.SetOutputLimits(10,95);
+  myPID.SetOutputLimits(50,130);
   myPID.SetMode(AUTOMATIC);
-  myPID.SetControllerDirection(REVERSE);
+  myPID.SetControllerDirection(REVERSE);  //DIRECT for normal mounting, REVERSE for inverted
 
   digitalWrite(13, LOW); 
   loop_timer = micros();    //Initialize loop timer
@@ -90,13 +92,20 @@ void loop() {
   read_mpu();                   //Read data
   process_mpu();                //Process data
   input = angle_pitch_output;   //Input into PID loop
-  myPID.Compute();              //Compute output
 
   calc_avg();                   //Output averaging
-   
-  servo.write((int)(output));   //Write output to servo
+  
+  if(abs(input-setpoint) < 3)
+  {
+    input = setpoint;
+  }
+  else
+  {
+    servo.write((int)(output));   //Write output to servo
+  }   
+  myPID.Compute();              //Compute output
   avgOut = 0;
-  //printData(angle_pitch_output, millis());                //Print values to serial
+  printData(angle_pitch_output, millis());                //Print values to serial
 
   if(Serial.available()>0){
     inString = "";
@@ -122,12 +131,12 @@ void loop() {
     }
     else
     {
-      //Serial.println("WARN;COMMAND NOT RECOGNIZED");
+      Serial.println("WARN;COMMAND NOT RECOGNIZED");
     }
   }
-  if(micros()-loop_timer < 4000)
+  if(micros()-loop_timer > 4000)
   {
-    Serial.println("WARN;LOOP TIME EXCEEDED");
+    Serial.println(micros()-loop_timer);
   }
   while(micros() - loop_timer < 4000);  //Constrain each loop to 4000us long for 250Hz refresh rate
   loop_timer = micros();                //Update the loop timer
