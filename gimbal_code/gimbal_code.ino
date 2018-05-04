@@ -189,7 +189,7 @@ void loop() {
     gyroYangle = kalAngleY;
   
   input = kalAngleX;   //Input into PID loop
-  if(abs(input) < 2.75)
+  if(abs(input-setpoint) < 3.5)
   {
     input = 0;
   }
