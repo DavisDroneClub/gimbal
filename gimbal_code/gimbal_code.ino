@@ -22,9 +22,9 @@
 #define NUM_AVG 5
 
 //PID TUNING VALUES- TUNE THE PID LOOP HERE
-double kp = 0.2;
-double ki = 5.5;
-double kd = 0.00001;
+double kp = 0.5;
+double ki = 4;
+double kd = 0.0015;
 
 //Declaring  global variables
 int gyro_x, gyro_y, gyro_z;
@@ -82,7 +82,7 @@ void setup() {
   output = 90;
   myPID.SetOutputLimits(50,130);
   myPID.SetMode(AUTOMATIC);
-  myPID.SetControllerDirection(REVERSE);  //DIRECT for normal mounting, REVERSE for inverted
+  myPID.SetControllerDirection(DIRECT);  //DIRECT for normal mounting, REVERSE for inverted
 
   digitalWrite(13, LOW); 
   loop_timer = micros();    //Initialize loop timer
@@ -105,7 +105,7 @@ void loop() {
   }   
   myPID.Compute();              //Compute output
   avgOut = 0;
-  printData(angle_pitch_output, millis());                //Print values to serial
+  //printData(angle_pitch_output, millis());                //Print values to serial
 
   if(Serial.available()>0){
     inString = "";
