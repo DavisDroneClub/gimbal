@@ -1,5 +1,5 @@
 # gimbal
 Software for operating the servo 1-axis gimbal
 
-Serial Connection Branch
-- Testing data transfer between Arduino and computer running python script
+/gimbal_code: Contains Arduino files for gimbal
+/gimbal_tester: Contains python script for testing response of gimbal
