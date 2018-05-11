@@ -9,6 +9,8 @@
 
 COMPORT = 'COM3'
 NUMPOINTS = 3000                                #Number of datapoints to collect
+STARTPOINT = 0
+TESTPOINT  = 30
 
 #--------------INITIALIZATION-------------
 #Importing libraries
@@ -39,13 +41,17 @@ except Exception as e:                          #If an error occurs, run this
     
 time.sleep(5)                                   #Wait for Arduino to restart
 
+def changeSetpoint(setpoint):
+    printstr = "SETSP;"+str(setpoint)
+    arduino.write(printstr.encode('utf-8'))
+
 #Initialize Empty Lists
 lines      = []
 angle      = []
 graphtime  = []
 sp         = []
 
-arduino.write("SETSP;0".encode('utf-8'))        #Reset setpoint
+changeSetpoint(STARTPOINT)                      #Reset setpoint
 arduino.write("SETDB;1.5".encode('utf-8'))      #Set deadband
 time.sleep(0.01)                                #Pause between messages
 arduino.write("TUNEI;5".encode('utf-8'))        #Set I parameter
@@ -70,14 +76,17 @@ for i in range(NUMPOINTS):                      #Iterate from 0 to number of dat
         print("Warn received: " + headers[1])   #Print the warning message
 
     if (i > (NUMPOINTS/3))&(switch == 0):       #A third of the way through
-        arduino.write("SETSP;20".encode('utf-8'))#Change the setpoint
-        SP = 20
+        changeSetpoint(TESTPOINT)               #Change the setpoint
+        SP = TESTPOINT
         switch = 1
     elif (i > (2*NUMPOINTS/3))&(switch == 1):   #Two thirds of the way through
-        arduino.write("SETSP;0".encode('utf-8'))#Reset hte setpoint
-        SP = 0
+        changeSetpoint(STARTPOINT)              #Reset the setpoint
+        SP = STARTPOINT
         switch = 2
-    lines.append(data)                          #Append data collected this iteration to list
+    try:
+        lines.append(data)                      #Append data collected this iteration to list
+    except:                                     #If something goes wrong, skip this iteration
+        continue
 
 #--------------POST PROCESSING------------
 with dataFile:                                  #Open the datafile
