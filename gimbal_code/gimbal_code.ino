@@ -47,6 +47,11 @@ int delimIndex;                 //Index of delimiter within string
 String tuneP = "TUNEP";         //Header content for tuning packet
 String tuneI = "TUNEI";         //Header content for tuning packet
 String tuneD = "TUNED";         //Header content for tuning packet
+String spStr = "SETSP";
+String dbStr = "SETDB";
+
+
+double deadband = 2.0;
 
 //Declaring servo object
 Servo servo;
@@ -56,6 +61,7 @@ double input, setpoint, output;
 
 PID myPID(&input, &output, &setpoint, kp, ki, kd, DIRECT);
 //Variables for data output
+String warn       = "WARN;";
 String dataString = "DATA;";
 String dataDelim  = ",";
 
@@ -82,7 +88,7 @@ void setup() {
   output = 90;
   myPID.SetOutputLimits(50,130);
   myPID.SetMode(AUTOMATIC);
-  myPID.SetControllerDirection(DIRECT);  //DIRECT for normal mounting, REVERSE for inverted
+  myPID.SetControllerDirection(REVERSE);  //DIRECT for normal mounting, REVERSE for inverted
 
   digitalWrite(13, LOW); 
   loop_timer = micros();    //Initialize loop timer
@@ -95,7 +101,7 @@ void loop() {
 
   calc_avg();                   //Output averaging
   
-  if(abs(input-setpoint) < 3)
+  if(abs(input-setpoint) < deadband)
   {
     input = setpoint;
   }
@@ -105,7 +111,7 @@ void loop() {
   }   
   myPID.Compute();              //Compute output
   avgOut = 0;
-  //printData(angle_pitch_output, millis());                //Print values to serial
+  printData(angle_pitch_output, millis());                //Print values to serial
 
   if(Serial.available()>0){
     inString = "";
@@ -129,9 +135,17 @@ void loop() {
     {
       processTune(parse_data, 'D');
     }
+    else if(parse_head == spStr)
+    {
+      setpoint = parse_data.toDouble(); 
+    }
+    else if(parse_head == dbStr)
+    {
+      deadband = parse_data.toDouble();
+    }
     else
     {
-      Serial.println("WARN;COMMAND NOT RECOGNIZED");
+      Serial.println(warn + parse_head);
     }
   }
   if(micros()-loop_timer > 4000)
