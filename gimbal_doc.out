@@ -1,0 +1,10 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Mechanical Design}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Sheet Metal Parts}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{3D Printed Parts}{section.2}% 4
+\BOOKMARK [1][-]{section.3}{Electrical Systems}{}% 5
+\BOOKMARK [2][-]{subsection.3.1}{Actuator}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.2}{Microcontroller}{section.3}% 7
+\BOOKMARK [1][-]{section.4}{Software}{}% 8
+\BOOKMARK [2][-]{subsection.4.1}{Arduino Code}{section.4}% 9
+\BOOKMARK [2][-]{subsection.4.2}{Python Code}{section.4}% 10

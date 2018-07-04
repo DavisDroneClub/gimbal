@@ -1,6 +1,10 @@
-/**
+/*
+ * ----------------------------------------------------------------------
  * MPU6050 INTERFACE V1.0
  * PROVIDES INITIALIZATION, READING, CALLIBRATION AND PROCESSING FUNCTIONALITY
+ * 
+ * Based on code from http://www.brokking.net/imu.html
+ * ----------------------------------------------------------------------
  */
 
 //Adjustable parameters
@@ -52,6 +56,9 @@ void cal_mpu(){                                         //Subroutine for callibr
   gyro_x_cal /= NUM_CAL;                                   //Divide the gyro_x_cal variable by 2000 to get the avarage offset
   gyro_y_cal /= NUM_CAL;                                   //Divide the gyro_y_cal variable by 2000 to get the avarage offset
   gyro_z_cal /= NUM_CAL;                                   //Divide the gyro_z_cal variable by 2000 to get the avarage offset
+
+  String printStr = String(gyro_x_cal) + "," + String(gyro_y_cal) + "," + String(gyro_z_cal);
+  Serial.println(printStr);
 }
 
 void process_mpu(){
@@ -80,8 +87,8 @@ void process_mpu(){
 
   //Combine gyroscope and accelerometer readings to correct for drift
   if(set_gyro_angles){
-    angle_pitch = angle_pitch * 0.9 + angle_pitch_acc * 0.1; 
-    angle_roll = angle_roll * 0.9 + angle_roll_acc * 0.1;     
+    angle_pitch = angle_pitch * 0.98 + angle_pitch_acc * 0.02; 
+    angle_roll = angle_roll * 0.98 + angle_roll_acc * 0.02;     
   }
   else{   //Initialize values if first loop
     angle_pitch = angle_pitch_acc;
@@ -90,8 +97,8 @@ void process_mpu(){
   }
 
   //Complementary filter
-  angle_pitch_output = angle_pitch_output * 0.8 + angle_pitch * 0.2;   //Take 90% of the output pitch value and add 10% of the raw pitch value
-  angle_roll_output  = angle_roll_output  * 0.8 + angle_roll  * 0.2;   //Take 90% of the output roll value and add 10% of the raw roll value
+  angle_pitch_output = angle_pitch_output * 0 + angle_pitch * 1;   //Take 90% of the output pitch value and add 10% of the raw pitch value
+  angle_roll_output  = angle_roll_output  * 0 + angle_roll  * 1;   //Take 90% of the output roll value and add 10% of the raw roll value
 
 }
 
