@@ -1,6 +1,7 @@
 # gimbal
-Software for operating the servo 1-axis gimbal
+Files for 1-axis servo gimbal
 
-/gimbal_code: Contains Arduino files for gimbal
-
+/Pictures: Pictures of gimbal for documentation
+/cad: Solidworks CAD files for gimbal
+/code: Contains Arduino files for gimbal
 /gimbal_tester: Contains python script for testing response of gimbal
