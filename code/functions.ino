@@ -5,6 +5,17 @@
  * ----------------------------------------------------------------------
  */
 
+/**
+ * Watchdog setup
+ * Resets the program if any error occurs
+ */
+void wdt_setup() {
+  cli();                            //Block interrupts
+  WDTCSR |= (1<<WDCE)|(1<<WDE);     //Enter watchdog setup mode
+  //Set watchdog timer for 1 minute
+  WDTCSR = (1<<WDE)|(0<<WDP3)|(1<<WDP2)|(1<<WDP1)|(0<<WDP0);  
+  sei();                            //Re-enable interrupts
+}
 
 /*
  * Initialize servo
@@ -23,21 +34,21 @@ void init_servo() {
 void processTune(String data, char mode){
   if(mode == 'P')                           //If P value selected
   {
-    kp.val_float = data.toDouble();         //Update kp and PID tuning
+    kp.val_float = data.toFloat();         //Update kp and PID tuning
     myPID.SetTunings(kp.val_float, ki.val_float, kd.val_float);
     writeVals();                            //Update EEPROM values
     Serial.println("TUNING UPDATE RECEIVED");
   }
   else if(mode == 'I')                      //If I value selected
   {
-    ki.val_float = data.toDouble();         //Update ki and PID tuning
+    ki.val_float = data.toFloat();         //Update ki and PID tuning
     myPID.SetTunings(kp.val_float, ki.val_float, kd.val_float);
     writeVals();                            //Update EEPROM values
     Serial.println("TUNING UPDATE RECEIVED");
   }
   else if(mode == 'D')                      //If D value selected
   {
-    kd.val_float = data.toDouble();         //Update kd and PID tuning
+    kd.val_float = data.toFloat();         //Update kd and PID tuning
     myPID.SetTunings(kp.val_float, ki.val_float, kd.val_float);
     writeVals();                            //Update EEPROM values
     Serial.println("TUNING UPDATE RECEIVED");

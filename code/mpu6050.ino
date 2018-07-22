@@ -11,7 +11,7 @@
 #define IMU_ADDR 0x68
 #define NUM_CAL  500
 
-void init_mpu(){                    //Sets registers to initialize MPU6050
+void init_mpu(){           //Sets registers to initialize MPU6050
   Wire.beginTransmission(IMU_ADDR); //Initialize I2C communication
   Wire.write(0x6B);                 //Address 6B
   Wire.write(0x00);                 //Write 00 to register 6B (Disable low power mode)
@@ -28,7 +28,7 @@ void init_mpu(){                    //Sets registers to initialize MPU6050
   Wire.endTransmission();           //End transmission
 }
 
-void read_mpu(){                        //Subroutine for reading the raw gyro and accelerometer data
+void read_mpu(){           //Subroutine for reading the raw gyro and accelerometer data
   Wire.beginTransmission(IMU_ADDR);         //Start communicating with the MPU-6050
   Wire.write(0x3B);                     //Send the requested starting register
   Wire.endTransmission();               //End the transmission
@@ -44,28 +44,31 @@ void read_mpu(){                        //Subroutine for reading the raw gyro an
   gyro_z = Wire.read()<<8|Wire.read();  //Add the low and high byte to the gyro_z variable
 }
 
-void cal_mpu(){                                         //Subroutine for callibrating MPU6050
-  for (int cal_int = 0; cal_int < NUM_CAL ; cal_int ++){   //Iterate 2000 times
+void cal_mpu(){            //Subroutine for callibrating MPU6050
+  
+  gyro_x_cal.val_float = 0;
+  gyro_y_cal.val_float = 0;
+  gyro_z_cal.val_float = 0;
+  
+  for (int cal_int = 0; cal_int < NUM_CAL ; cal_int ++){  //Iterate 2000 times
     //if(cal_int % 125 == 0)Serial.print(".");            //Print a dot every 125 readings
-    read_mpu();                                         //Read the raw acc and gyro data from the MPU-6050
-    gyro_x_cal += gyro_x;                               //Add the gyro x-axis offset to the gyro_x_cal variable
-    gyro_y_cal += gyro_y;                               //Add the gyro y-axis offset to the gyro_y_cal variable
-    gyro_z_cal += gyro_z;                               //Add the gyro z-axis offset to the gyro_z_cal variable
-    delay(3);                                           //Delay 3us to simulate the 250Hz program loop
+    read_mpu();                                           //Read the raw acc and gyro data from the MPU-6050
+    gyro_x_cal.val_float += gyro_x;                       //Add the gyro x-axis offset to the gyro_x_cal variable
+    gyro_y_cal.val_float += gyro_y;                       //Add the gyro y-axis offset to the gyro_y_cal variable
+    gyro_z_cal.val_float += gyro_z;                       //Add the gyro z-axis offset to the gyro_z_cal variable
+    delay(3);                                             //Delay 3us to simulate the 250Hz program loop
   }
-  gyro_x_cal /= NUM_CAL;                                   //Divide the gyro_x_cal variable by 2000 to get the avarage offset
-  gyro_y_cal /= NUM_CAL;                                   //Divide the gyro_y_cal variable by 2000 to get the avarage offset
-  gyro_z_cal /= NUM_CAL;                                   //Divide the gyro_z_cal variable by 2000 to get the avarage offset
-
-  String printStr = String(gyro_x_cal) + "," + String(gyro_y_cal) + "," + String(gyro_z_cal);
-  Serial.println(printStr);
+  gyro_x_cal.val_float /= NUM_CAL;                        //Divide the gyro_x_cal variable by 2000 to get the avarage offset
+  gyro_y_cal.val_float /= NUM_CAL;                        //Divide the gyro_y_cal variable by 2000 to get the avarage offset
+  gyro_z_cal.val_float /= NUM_CAL;                        //Divide the gyro_z_cal variable by 2000 to get the avarage offset
+  writeVals();
 }
 
 void process_mpu(){
   //Compensate for calibration offset
-  gyro_x -= gyro_x_cal;  
-  gyro_y -= gyro_y_cal;  
-  gyro_z -= gyro_z_cal;  
+  gyro_x -= gyro_x_cal.val_float;  
+  gyro_y -= gyro_y_cal.val_float;  
+  gyro_z -= gyro_z_cal.val_float;  
 
   //"Integrate" gyroscope reading to get current angle
   // Multiply each reading by 65.5 to convert to deg/second, Multiply by 1/250Hz to get seconds
