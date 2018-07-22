@@ -30,7 +30,7 @@ boolean print_en = false;
 #include <avr/wdt.h>
 
 //Version here
-int VERSION[] = {2,1};
+int VERSION[] = {2,2};
 
 //Declare a union datatype to allow easy conversion between float and byte
 //More information on union: https://www.tutorialspoint.com/cprogramming/c_unions.htm
