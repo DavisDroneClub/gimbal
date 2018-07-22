@@ -1,4 +1,4 @@
-# Gimbal Code V2.0 #
+# Gimbal Code V2.2 #
 
 ## File Descriptions ##
 * code.ino: Program variable declaration, setup, and main loop.
@@ -31,7 +31,11 @@ SETSP|float|Set the setpoint of the PID controller (typically 0)|SETSP;0
 SETDB|float|Set the deadband size in degrees|SETSP;2.5
 SETDR|bool |Set gimbal direction. 0 for inverted, 1 for regular|SETDR;0
 SETPT|bool |Enable/disable data packet. 0 for disable, 1 for enable|SETPT;1
+SETEN|bool |Enable/disable gimbal movement|SETEN;1
 GETEP|0    |Request an EEPR packet|GETEP;0
+GETVE|0    |Request the gimbal firmware version|GETVE;0
+GETDN|0    |Request the device name|GETDN;0
+CALGY|0    |Begin gyroscope calibration|CALGY;0
 
 ### Data Packets ###
 Header | Data Format | Usage | Example
@@ -40,3 +44,5 @@ WARN|Warning (text)|Issued when unknown command received | WARN;Unknown mode
 LOOP|Loop time (int)|Issued when loop time exceeded, returns loop time in us | LOOP;4871
 DATA|angle (float), loop duration (int), current time (int)|Returns angle in degrees, loop duration and current time in us | DATA;1.3;2320;13523
 EEPR|Kp (float), Ki (float), Kd (float), deadband (float)|Returns data stored in EEPROM|EEPR;0.1,3,0.0015,2.0
+DEVN|Device name  (text)|Used to confirm device name|DEVN;ddc-gimbal
+VERS|Version major (int); Version minor (int)|Used to get gimbal firmware version|VERS;2;1
