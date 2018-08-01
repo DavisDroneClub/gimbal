@@ -1,13 +1,15 @@
 /*
  * ----------------------------------------------------------------------
- * Davis Drone Club Gimbal v2.2 firmware
+ * Davis Drone Club Gimbal v2.3 firmware
  * 
- * CHANGELOG (v2.0 -> v2.2)
+ * CHANGELOG (v2.0 -> v2.3)
  * - (2.1) Add watchdog timer
  * - (2.1) Add Enable response
  * - (2.1) Add Position response
  * - (2.1) Save calibration values to EEPROM
  * - (2.2) Changed serial read implementation to non-blocking
+ * - (2.3) Changed IMU algorithm to quaternion-based
+ * - (2.3) Added adaptive gain
  * 
  * PID_v1 library can be downloaded from here: https://github.com/br3ttb/Arduino-PID-Library
  * 

@@ -34,74 +34,105 @@ void read_mpu(){           //Subroutine for reading the raw gyro and acceleromet
   Wire.endTransmission();               //End the transmission
   Wire.requestFrom(IMU_ADDR,14);            //Request 14 bytes from the MPU-6050
   while(Wire.available() < 14);         //Wait until all the bytes are received
-
-  acc_x  = Wire.read()<<8|Wire.read();  //Add the low and high byte to the acc_x variable
-  acc_y  = Wire.read()<<8|Wire.read();  //Add the low and high byte to the acc_y variable
-  acc_z  = Wire.read()<<8|Wire.read();  //Add the low and high byte to the acc_z variable
-  temp   = Wire.read()<<8|Wire.read();  //Add the low and high byte to the temperature variable
-  gyro_x = Wire.read()<<8|Wire.read();  //Add the low and high byte to the gyro_x variable
-  gyro_y = Wire.read()<<8|Wire.read();  //Add the low and high byte to the gyro_y variable
-  gyro_z = Wire.read()<<8|Wire.read();  //Add the low and high byte to the gyro_z variable
+  for(int i = 0; i < 3; i++) {
+    acc[i]  = (Wire.read()<<8|Wire.read()) * (0.000244141) * ( 9.80665);  //Add the low and high byte to the acc_x variable
+  }
+  temp   = Wire.read()<<8|Wire.read();   //Add the low and high byte to the temperature variable
+  for(int i = 0; i < 3; i++) {
+    gyro[i]  = (Wire.read()<<8|Wire.read()) * (0.007629395) * DEG_TO_RAD;  //Add the low and high byte to the acc_x variable
+  }
 }
-
 void cal_mpu(){            //Subroutine for callibrating MPU6050
-  
-  gyro_x_cal.val_float = 0;
-  gyro_y_cal.val_float = 0;
-  gyro_z_cal.val_float = 0;
-  
+  for (int i = 0; i < 3; i++) {
+    gyro_cal[i] = 0;
+  }
+
+  acc_cal.val_float = 0;
+
   for (int cal_int = 0; cal_int < NUM_CAL ; cal_int ++){  //Iterate 2000 times
     //if(cal_int % 125 == 0)Serial.print(".");            //Print a dot every 125 readings
     read_mpu();                                           //Read the raw acc and gyro data from the MPU-6050
-    gyro_x_cal.val_float += gyro_x;                       //Add the gyro x-axis offset to the gyro_x_cal variable
-    gyro_y_cal.val_float += gyro_y;                       //Add the gyro y-axis offset to the gyro_y_cal variable
-    gyro_z_cal.val_float += gyro_z;                       //Add the gyro z-axis offset to the gyro_z_cal variable
+    for (int i = 0; i < 3; i++) {
+      gyro_cal[i] += gyro[i];
+    }
+    acc_cal.val_float += sqrt(pow(acc[0],2)+pow(acc[1],2)+pow(acc[2],2));
     delay(3);                                             //Delay 3us to simulate the 250Hz program loop
   }
-  gyro_x_cal.val_float /= NUM_CAL;                        //Divide the gyro_x_cal variable by 2000 to get the avarage offset
-  gyro_y_cal.val_float /= NUM_CAL;                        //Divide the gyro_y_cal variable by 2000 to get the avarage offset
-  gyro_z_cal.val_float /= NUM_CAL;                        //Divide the gyro_z_cal variable by 2000 to get the avarage offset
+  for (int i = 0; i < 3; i++) {
+    gyro_cal[i] /= NUM_CAL;
+  }
+  acc_cal.val_float /= NUM_CAL;
+
+  gyro_x_cal.val_float = gyro_cal[0];
+  gyro_y_cal.val_float = gyro_cal[1];
+  gyro_z_cal.val_float = gyro_cal[2];
   writeVals();
 }
 
 void process_mpu(){
-  //Compensate for calibration offset
-  gyro_x -= gyro_x_cal.val_float;  
-  gyro_y -= gyro_y_cal.val_float;  
-  gyro_z -= gyro_z_cal.val_float;  
+  /*
+    Normalize gyro measurements into pure quaternion
+  */
+  gyro_raw_q[0] = 0;
+  gyro_raw_q[1] = -0.5*gyro[0];
+  gyro_raw_q[2] = -0.5*gyro[1];
+  gyro_raw_q[3] = -0.5*gyro[2];
 
-  //"Integrate" gyroscope reading to get current angle
-  // Multiply each reading by 65.5 to convert to deg/second, Multiply by 1/250Hz to get seconds
-  //0.0000611 = 65.5/250Hz
-  //sine to transfer roll to pitch if yaw is present
+  /*
+    Calculate adapative gain
+  */
+  err_mag = (abs(vect_magnitude(acc))-acc_cal.val_float)/acc_cal.val_float;
+  alpha = BASE_GAIN*err_gain_factor(err_mag, THRESH_LOW, THRESH_HIGH);
 
-  
-  angle_pitch += gyro_x * 0.0000611;
-  angle_pitch += angle_roll * sin(gyro_z * 0.000001066);
-  
-  angle_roll += gyro_y * 0.0000611;
-  angle_roll -= angle_pitch * sin(gyro_z * 0.000001066);
+  //Calculate global rate from local rate
+  multiply(gyro_raw_q, prev_q, rate_gyro_global);
 
-  //Acceleromter angle reading
-  //57.296 = 1 / (3.142 / 180) The Arduino asin function is in radians
-  acc_total_vector = sqrt((acc_x*acc_x)+(acc_y*acc_y)+(acc_z*acc_z));   //Magnitude of sum vector
-  angle_pitch_acc = asin((float)acc_y/acc_total_vector)* 57.296;        //Use trigonometry to find angles
-  angle_roll_acc = asin((float)acc_x/acc_total_vector)* -57.296;
-
-  //Combine gyroscope and accelerometer readings to correct for drift
-  if(set_gyro_angles){
-    angle_pitch = angle_pitch * 0.98 + angle_pitch_acc * 0.02; 
-    angle_roll = angle_roll * 0.98 + angle_roll_acc * 0.02;     
+  //Integrate global rate
+  for (int i = 0; i < 4; i++) {
+      gyro_q[i] = prev_q[i] + gyro_raw_q[i] * INTERVAL;
+      //gyro_q_norm[i] = gyro_q[i];
   }
-  else{   //Initialize values if first loop
-    angle_pitch = angle_pitch_acc;
-    angle_roll = angle_roll_acc;
-    set_gyro_angles = true;
+  
+  //Step 3
+  quat_to_inverse_matrix(gyro_q, gyro_R);
+
+  //Step 4
+  vect_normalize(acc);
+  matrix_multiply(gyro_R, acc, g_predict);
+  vect_normalize(g_predict);
+
+  //Step 5
+  d_q_acc[0] = sqrt((g_predict[2]+1)/2);
+  d_q_acc[1] = -g_predict[1]/(sqrt(2*(g_predict[2]+1)));
+  d_q_acc[2] = g_predict[0]/(sqrt(2*(g_predict[2]+1)));
+  d_q_acc[3] = 0;
+
+  //Step 6
+  if(d_q_acc[0]>EPSILON) {
+    //LEPR
+    for(int i = 0; i < 4; i++) {
+      d_acc_interp[i] = (1-alpha)*q_i[i]+alpha*d_q_acc[i];
+    }
+    quat_normalize(d_acc_interp);
+  }
+  else {
+    slerp(alpha, d_q_acc, d_acc_interp);
   }
 
-  //Complementary filter
-  angle_pitch_output = angle_pitch_output * 0 + angle_pitch * 1;   //Take 90% of the output pitch value and add 10% of the raw pitch value
-  angle_roll_output  = angle_roll_output  * 0 + angle_roll  * 1;   //Take 90% of the output roll value and add 10% of the raw roll value
+  //Step 7
+  multiply(gyro_q, d_acc_interp, q_out);
 
+  for(int i = 0; i < 4; i++) {
+    prev_q[i] = q_out[i];
+  }
+
+  yaw = atan2(-2*q_out[1]*q_out[2]+2*q_out[0]*q_out[3],
+                 pow(q_out[0],2) + pow(q_out[1],2) -
+                 pow(q_out[2],2) - pow(q_out[3],2))*RAD_TO_DEG;
+  
+  pitch = asin(2*q_out[1]*q_out[3]+2*q_out[0]*q_out[2])*RAD_TO_DEG;
+  roll  = atan2(-2*q_out[2]*q_out[3]+2*q_out[0]*q_out[1],
+                pow(q_out[3],2) - pow(q_out[2],2) -
+                pow(q_out[1],2) + pow(q_out[0],2))*RAD_TO_DEG;
 }
 

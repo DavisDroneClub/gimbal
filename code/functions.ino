@@ -13,7 +13,7 @@ void wdt_setup() {
   cli();                            //Block interrupts
   WDTCSR |= (1<<WDCE)|(1<<WDE);     //Enter watchdog setup mode
   //Set watchdog timer for 1 minute
-  WDTCSR = (1<<WDE)|(0<<WDP3)|(1<<WDP2)|(1<<WDP1)|(0<<WDP0);  
+  WDTCSR = (1<<WDE)|(0<<WDP3)|(1<<WDP2)|(1<<WDP1)|(1<<WDP0);  
   sei();                            //Re-enable interrupts
 }
 
@@ -80,13 +80,13 @@ void actuate() {
  */
 void enforceLoop() {
   loop_duration = micros()-loop_timer;
-  if(loop_duration > 4000)               //If the loop timer exceeds 4000us
+  if(loop_duration > 5555)               //If the loop timer exceeds 5555us
   {
     Serial.println(loopString + headDelim + loop_duration); //Print out current loop duration
   }
-  else                                   //If loop timer falls below 4000us
+  else                                   //If loop timer falls below 5555us
   {
-    while(micros() - loop_timer < 4000); //Wait until 4000us passes
+    while(micros() - loop_timer < 5555); //Wait until 5555us passes
   }
   loop_timer = micros();                 //Update the loop timer
 }

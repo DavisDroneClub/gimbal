@@ -15,6 +15,7 @@
  * x_cal      16- 19
  * y_cal      20- 23
  * z_cal      24- 27
+ * acc_cal    28- 31
  */
 
 /**
@@ -28,7 +29,8 @@ void writeVals() {
     EEPROM.update(12+i, deadband.val_byte[i]);
     EEPROM.update(16+i, gyro_x_cal.val_byte[i]); 
     EEPROM.update(20+i, gyro_y_cal.val_byte[i]); 
-    EEPROM.update(24+i, gyro_z_cal.val_byte[i]); 
+    EEPROM.update(24+i, gyro_z_cal.val_byte[i]);
+    EEPROM.update(28+i, acc_cal.val_byte[i]); 
   }
 }
 
@@ -44,6 +46,7 @@ void readVals() {
     gyro_x_cal.val_byte[i] = EEPROM.read(16+i);
     gyro_y_cal.val_byte[i] = EEPROM.read(20+i);
     gyro_z_cal.val_byte[i] = EEPROM.read(24+i);
+    acc_cal.val_byte[i]    = EEPROM.read(28+i);
   }
 }
 
