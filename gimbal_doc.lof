@@ -1,0 +1,22 @@
+\contentsline {figure}{\numberline {1}{\ignorespaces Sheet Metal Plates\relax }}{1}{figure.caption.4}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Matrice Plate}}}{1}{subfigure.1.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Gimbal Plate}}}{1}{subfigure.1.2}
+\contentsline {figure}{\numberline {2}{\ignorespaces Hardware Flowchart\relax }}{2}{figure.caption.5}
+\contentsline {figure}{\numberline {3}{\ignorespaces Overall Software Flowchart\relax }}{6}{figure.caption.7}
+\contentsline {figure}{\numberline {4}{\ignorespaces Euler and Quaternion Orientation Representation\relax }}{8}{figure.caption.8}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Euler Representation \href {http://www.chrobotics.com/library/understanding-quaternions}{[Source]}}}}{8}{subfigure.4.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Quaternion Representation \href {https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation}{[Source]}}}}{8}{subfigure.4.2}
+\contentsline {figure}{\numberline {5}{\ignorespaces Quaternion-Based Complimentary Filter Flowchart\relax }}{9}{figure.caption.9}
+\contentsline {figure}{\numberline {6}{\ignorespaces Results of Varying Base Gain\relax }}{11}{figure.caption.10}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Base Gain = 0.01}}}{11}{subfigure.6.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Base Gain = 0.015}}}{11}{subfigure.6.2}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Base Gain = 0.017}}}{11}{subfigure.6.3}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Base Gain = 0.05}}}{11}{subfigure.6.4}
+\contentsline {figure}{\numberline {7}{\ignorespaces Results of Varying $\epsilon $\relax }}{12}{figure.caption.11}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {$\epsilon $ = 0.7}}}{12}{subfigure.7.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {$\epsilon $ = 0.8}}}{12}{subfigure.7.2}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {$\epsilon $ = 0.9}}}{12}{subfigure.7.3}
+\contentsline {figure}{\numberline {8}{\ignorespaces Results of Varying Threshold Range\relax }}{13}{figure.caption.12}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {L = 0.025, U = 0.075}}}{13}{subfigure.8.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {L = 0.05, U = 0.1}}}{13}{subfigure.8.2}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {L = 0.1, U = 0.2}}}{13}{subfigure.8.3}

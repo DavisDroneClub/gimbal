@@ -16,17 +16,57 @@
 \gdef\HyperFirstAtBeginDocument#1{#1}
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
-\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Mechanical Design}{2}{section.2}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Sheet Metal Parts}{2}{subsection.2.1}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}3D Printed Parts}{2}{subsection.2.2}}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Electrical Systems}{3}{section.3}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Actuator}{3}{subsection.3.1}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Microcontroller}{3}{subsection.3.2}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Software}{4}{section.4}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Arduino Code}{4}{subsection.4.1}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.1}Libraries}{4}{subsubsection.4.1.1}}
-\@writefile{lol}{\contentsline {lstlisting}{code/code.ino}{4}{lstlisting.-1}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.2}Variable Instantiation}{4}{subsubsection.4.1.2}}
-\@writefile{lol}{\contentsline {lstlisting}{code/code.ino}{4}{lstlisting.-2}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Python Code}{4}{subsection.4.2}}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Mechanical Design}{1}{section.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Sheet Metal Parts}{1}{subsection.1.1}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Sheet Metal Plates\relax }}{1}{figure.caption.4}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Matrice Plate}}}{1}{subfigure.1.1}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {Gimbal Plate}}}{1}{subfigure.1.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}3D Printed Parts}{1}{subsection.1.2}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Electrical Systems}{2}{section.2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Hardware Flowchart\relax }}{2}{figure.caption.5}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:hardware}{{2}{2}{Hardware Flowchart\relax }{figure.caption.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Microcontroller}{2}{subsection.2.1}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.1}Pin Assignments}{3}{subsubsection.2.1.1}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Arduino Nano Pin Assignments\relax }}{3}{table.caption.6}}
+\newlabel{tab:nano_pins}{{1}{3}{Arduino Nano Pin Assignments\relax }{table.caption.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Inertial Measurement Unit}{3}{subsection.2.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Actuator}{4}{subsection.2.3}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Algorithm Design}{5}{section.3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Overall Software Flowchart\relax }}{6}{figure.caption.7}}
+\newlabel{fig:software_flowchart}{{3}{6}{Overall Software Flowchart\relax }{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Orientation Filter Algorithm}{7}{subsection.3.1}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.1}Implementing the Quaternion-Based Complimentary Filter}{8}{subsubsection.3.1.1}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Euler and Quaternion Orientation Representation\relax }}{8}{figure.caption.8}}
+\newlabel{fig:euler_quat}{{4}{8}{Euler and Quaternion Orientation Representation\relax }{figure.caption.8}{}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Euler Representation \href {http://www.chrobotics.com/library/understanding-quaternions}{[Source]}}}}{8}{subfigure.4.1}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {Quaternion Representation \href {https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation}{[Source]}}}}{8}{subfigure.4.2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Quaternion-Based Complimentary Filter Flowchart\relax }}{9}{figure.caption.9}}
+\newlabel{fig:quat_flowchart}{{5}{9}{Quaternion-Based Complimentary Filter Flowchart\relax }{figure.caption.9}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.2}Implementing Adaptive Gain}{9}{subsubsection.3.1.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Testing the Quaternion-Based Filter}{10}{subsection.3.2}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}Varying Base Gain}{11}{subsubsection.3.2.1}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Results of Varying Base Gain\relax }}{11}{figure.caption.10}}
+\newlabel{fig:base_gain}{{6}{11}{Results of Varying Base Gain\relax }{figure.caption.10}{}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Base Gain = 0.01}}}{11}{subfigure.6.1}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {Base Gain = 0.015}}}{11}{subfigure.6.2}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {Base Gain = 0.017}}}{11}{subfigure.6.3}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {Base Gain = 0.05}}}{11}{subfigure.6.4}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}Varying $\epsilon $}{12}{subsubsection.3.2.2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Results of Varying $\epsilon $\relax }}{12}{figure.caption.11}}
+\newlabel{fig:epsilon}{{7}{12}{Results of Varying $\epsilon $\relax }{figure.caption.11}{}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {$\epsilon $ = 0.7}}}{12}{subfigure.7.1}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {$\epsilon $ = 0.8}}}{12}{subfigure.7.2}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {$\epsilon $ = 0.9}}}{12}{subfigure.7.3}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.3}Varying Threshold Values}{13}{subsubsection.3.2.3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Results of Varying Threshold Range\relax }}{13}{figure.caption.12}}
+\newlabel{fig:threshold}{{8}{13}{Results of Varying Threshold Range\relax }{figure.caption.12}{}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {L = 0.025, U = 0.075}}}{13}{subfigure.8.1}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {L = 0.05, U = 0.1}}}{13}{subfigure.8.2}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {L = 0.1, U = 0.2}}}{13}{subfigure.8.3}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Arduino Code}{14}{section.4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Union Data Type}{14}{subsection.4.1}}
+\@writefile{lol}{\contentsline {lstlisting}{code/code.ino}{14}{lstlisting.-1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Reading and Writing EEPROM}{15}{subsection.4.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Non-Blocking Serial Input}{15}{subsection.4.3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Watchdog Timer}{15}{subsection.4.4}}

@@ -1,12 +1,21 @@
-\contentsline {section}{\numberline {1}Introduction}{1}{section.1}
-\contentsline {section}{\numberline {2}Mechanical Design}{2}{section.2}
-\contentsline {subsection}{\numberline {2.1}Sheet Metal Parts}{2}{subsection.2.1}
-\contentsline {subsection}{\numberline {2.2}3D Printed Parts}{2}{subsection.2.2}
-\contentsline {section}{\numberline {3}Electrical Systems}{3}{section.3}
-\contentsline {subsection}{\numberline {3.1}Actuator}{3}{subsection.3.1}
-\contentsline {subsection}{\numberline {3.2}Microcontroller}{3}{subsection.3.2}
-\contentsline {section}{\numberline {4}Software}{4}{section.4}
-\contentsline {subsection}{\numberline {4.1}Arduino Code}{4}{subsection.4.1}
-\contentsline {subsubsection}{\numberline {4.1.1}Libraries}{4}{subsubsection.4.1.1}
-\contentsline {subsubsection}{\numberline {4.1.2}Variable Instantiation}{4}{subsubsection.4.1.2}
-\contentsline {subsection}{\numberline {4.2}Python Code}{4}{subsection.4.2}
+\contentsline {section}{\numberline {1}Mechanical Design}{1}{section.1}
+\contentsline {subsection}{\numberline {1.1}Sheet Metal Parts}{1}{subsection.1.1}
+\contentsline {subsection}{\numberline {1.2}3D Printed Parts}{1}{subsection.1.2}
+\contentsline {section}{\numberline {2}Electrical Systems}{2}{section.2}
+\contentsline {subsection}{\numberline {2.1}Microcontroller}{2}{subsection.2.1}
+\contentsline {subsubsection}{\numberline {2.1.1}Pin Assignments}{3}{subsubsection.2.1.1}
+\contentsline {subsection}{\numberline {2.2}Inertial Measurement Unit}{3}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Actuator}{4}{subsection.2.3}
+\contentsline {section}{\numberline {3}Algorithm Design}{5}{section.3}
+\contentsline {subsection}{\numberline {3.1}Orientation Filter Algorithm}{7}{subsection.3.1}
+\contentsline {subsubsection}{\numberline {3.1.1}Implementing the Quaternion-Based Complimentary Filter}{8}{subsubsection.3.1.1}
+\contentsline {subsubsection}{\numberline {3.1.2}Implementing Adaptive Gain}{9}{subsubsection.3.1.2}
+\contentsline {subsection}{\numberline {3.2}Testing the Quaternion-Based Filter}{10}{subsection.3.2}
+\contentsline {subsubsection}{\numberline {3.2.1}Varying Base Gain}{11}{subsubsection.3.2.1}
+\contentsline {subsubsection}{\numberline {3.2.2}Varying $\epsilon $}{12}{subsubsection.3.2.2}
+\contentsline {subsubsection}{\numberline {3.2.3}Varying Threshold Values}{13}{subsubsection.3.2.3}
+\contentsline {section}{\numberline {4}Arduino Code}{14}{section.4}
+\contentsline {subsection}{\numberline {4.1}Union Data Type}{14}{subsection.4.1}
+\contentsline {subsection}{\numberline {4.2}Reading and Writing EEPROM}{15}{subsection.4.2}
+\contentsline {subsection}{\numberline {4.3}Non-Blocking Serial Input}{15}{subsection.4.3}
+\contentsline {subsection}{\numberline {4.4}Watchdog Timer}{15}{subsection.4.4}
