@@ -297,6 +297,18 @@ Three sets of threshold values were tested. 0.025-0.075, 0.05-0.1, and 0.1-0.2. 
 
 It would appear that higher ranges of threshold cause the graph of the quaternion-based algorithm to act like the Euler algorithm. Lower threshold ranges result in smoother, but delayed responses. Further testing may be required to see how the shape of the response curve changes with threshold values. 
  
+\subsection{Future Improvements}
+Below are a list of possible improvements for the algorithm
+\begin{itemize}
+\item Use an IMU with a magnetometer to provide compensation along the yaw axis.
+\item Test an algorithm with Euler angles and an adaptive gain system to increase algorithm speed.
+\item Use a faster microcontroller to increase sampling rate.
+\item Continue tuning existing algorithm to improve response and resilience.
+	\begin{itemize}
+	\item Develop an automated tuner with a gradient descent approach.
+	\item Continue further testing on the M100 platform.
+	\end{itemize}
+\end{itemize}
 
 \section{Arduino Code}
 
