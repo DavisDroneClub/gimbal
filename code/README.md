@@ -1,4 +1,4 @@
-# Gimbal Code V2.2 #
+# Gimbal Code V2.3 #
 
 ## File Descriptions ##
 * code.ino: Program variable declaration, setup, and main loop.
