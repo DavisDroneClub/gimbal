@@ -8,9 +8,9 @@
  * - (2.1) Add Position response
  * - (2.1) Save calibration values to EEPROM
  * - (2.2) Changed serial read implementation to non-blocking
- * - (2.3) Changed IMU algorithm to quaternion-based
- * - (2.3) Added adaptive gain
- * 
+ * - (2.3) Changed to quaternion IMU processing
+ * - (2.3) Increased loop duration
+ * - (2.3) Implemented adaptive gains
  * PID_v1 library can be downloaded from here: https://github.com/br3ttb/Arduino-PID-Library
  * 
  * --------------------ADJUSTABLE SETTINGS--------------------
@@ -19,7 +19,13 @@
 boolean gimbalDir = 1;
 
 //PRINT DATA TO SERIAL: true FOR ENABLED, false FOR DISABLE 
-boolean print_en = false;
+boolean print_en = true;
+
+//Quaternion Filter Variables
+double BASE_GAIN = 0.017;
+double THRESH_LOW = 0.05;
+double THRESH_HIGH = 0.1;
+double EPSILON = 0.8;
 
 /*
  * --------------------VARIABLE DECLARATIONS------------------
@@ -32,7 +38,7 @@ boolean print_en = false;
 #include <avr/wdt.h>
 
 //Version here
-int VERSION[] = {2,2};
+int VERSION[] = {2,3};
 
 //Declare a union datatype to allow easy conversion between float and byte
 //More information on union: https://www.tutorialspoint.com/cprogramming/c_unions.htm
@@ -42,16 +48,35 @@ union EEPOMvals {               //Define variables stored in EEPROM
 } kp, ki, kd, deadband, gyro_x_cal, gyro_y_cal, gyro_z_cal;
 
 //Declaring global variables for IMU and angle calculations
-int gyro_x, gyro_y, gyro_z;
-float acc_x, acc_y, acc_z, acc_total_vector;
+double acc[3], gyro[3], gyro_cal[3];
+double acc_cal;
 int temp;
+
 float loop_timer;
 int  loop_duration;
 int  loop_counter;
-float angle_pitch, angle_roll;
-boolean set_gyro_angles;
-float angle_roll_acc, angle_pitch_acc;
-float angle_pitch_output, angle_roll_output;
+
+//Quaternion Math Variables
+double identity[] = {1,0,0,0};
+double omega;
+double INTERVAL = 0.0055555;
+double gyro_raw_q[4];
+double err_mag;
+double alpha;
+double q_i[] = {1,0,0,0};
+double prev_q[] = {1,0,0,0};
+double curr_q;
+double rate_gyro_global[4];
+double gyro_q[4];
+double gyro_R[3][3];
+double g_predict[3];
+double d_q_acc[4];
+double d_acc_interp[4];
+double q_out[4];
+unsigned long prev_time, delta;
+double yaw, pitch, roll;
+double test[] = {1,2,3,4};
+double test_R[3][3];
 
 //Declaring strings for Serial communication
 
@@ -93,6 +118,7 @@ PID myPID(&input, &output, &setpoint, kp.val_float, ki.val_float, kd.val_float, 
  * --------------------SETUP FUNCTION--------------------
  */
 void setup() {
+  cal_mpu();
   wdt_setup();                    //Setup watchdog timer
   readVals();                     //Read PID values from EEPROM
   myPID.SetTunings(kp.val_float, ki.val_float, kd.val_float);
@@ -107,7 +133,7 @@ void setup() {
   myPID.SetOutputLimits(LOW_BOUND,HIGH_BOUND);  //Set output limits of PID controller
   myPID.SetMode(AUTOMATIC);       //Activate PID controller by setting to AUTOMATIC
   myPID.SetControllerDirection(gimbalDir);  //Set mounting direction
-
+  
   digitalWrite(13, LOW);          //Turn off LED after initialization
   loop_timer = micros();          //Initialize loop timer
   loop_counter = 0;
@@ -119,13 +145,13 @@ void setup() {
 void loop() {
   read_mpu();                     //Read data
   process_mpu();                  //Process data
-  input = angle_pitch_output;     //Input into PID loop
-  actuate();                      //Actuate gimbal and deadband
-
+  input = roll;                   //Input into PID loop
   myPID.Compute();                //Compute output
 
+  actuate();                      //Actuate gimbal and deadband
+
   //Print data to serial if PRINT is enabled
-  if(print_en & ((loop_counter%30)==0)) printData(angle_pitch_output, millis());
+  if(print_en & ((loop_counter%30)==0)) printData(roll, millis());
 
   checkSerial();                  //Check for serial commands
   enforceLoop();                  //Enforce loop timer

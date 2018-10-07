@@ -71,7 +71,7 @@
 
 %%% The "real" document content comes below...
 
-\title{Auto-Leveling Gimbal Documentation}
+\title{Auto-Leveling Gimbal \\ Technical Documentation}
 \author{Davis Drone Club}
 \date{\today} % Activate to display a given date or no date (if empty),
          % otherwise the current date is printed 
@@ -140,6 +140,8 @@ The Arduino Nano microcontroller was chosen to operate the gimbal because of wid
 The I2C SDA and SCL pins must be connected to pins A4 and A5 respectively due to the hardware of the Arduino Nano, however; the servo output wire can be changed to any arbitrary digital output pin as long as the software is updated to the correct pin.
 \begin{table}[H]
 	\begin{center}
+		\caption{Arduino Nano Pin Assignments}
+		\label{tab:nano_pins}
 		\begin{tabular}[l]{|c|c|}
 			\hline
 			\textbf{Pin} & \textbf{Description} \\ \hline \hline
@@ -149,8 +151,7 @@ The I2C SDA and SCL pins must be connected to pins A4 and A5 respectively due to
 			D13 & Arduino built-in LED \\ \hline
 			
 		\end{tabular}
-		\caption{Arduino Nano Pin Assignments}
-		\label{tab:nano_pins}
+		
 	\end{center}
 \end{table}
 
@@ -300,7 +301,7 @@ It would appear that higher ranges of threshold cause the graph of the quaternio
 \section{Arduino Code}
 
 Software for the gimbal was written in Arduino code, which is based on the C++ language, on the Arduino IDE. The code can be uploaded to the Arduino Nano through the Arduino IDE. Files can be found on the \href{https://github.com/DavisDroneClub/gimbal}{Davis Drone Club Github.}
-The gimbal code is designed to run on the 16MHz Arduino Nano. Arduino code is based on C and C++, so many resources for C/C++ can be used to understand Arduino code. This section will cover sections of the code that may not be used in most resources.
+The gimbal code is designed to run on the 16MHz Arduino Nano. Arduino code is based on C and C++, so many resources for C/C++ can be used to understand Arduino code. This section will cover concepts of the code that may not be covered in most learning resources.
 
 \subsection{Union Data Type}
 

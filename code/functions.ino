@@ -13,7 +13,7 @@ void wdt_setup() {
   cli();                            //Block interrupts
   WDTCSR |= (1<<WDCE)|(1<<WDE);     //Enter watchdog setup mode
   //Set watchdog timer for 1 minute
-  WDTCSR = (1<<WDE)|(0<<WDP3)|(1<<WDP2)|(1<<WDP1)|(1<<WDP0);  
+  WDTCSR = (1<<WDE)|(0<<WDP3)|(1<<WDP2)|(1<<WDP1)|(0<<WDP0);  
   sei();                            //Re-enable interrupts
 }
 

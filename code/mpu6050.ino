@@ -47,7 +47,7 @@ void cal_mpu(){            //Subroutine for callibrating MPU6050
     gyro_cal[i] = 0;
   }
 
-  acc_cal.val_float = 0;
+  acc_cal = 0;
 
   for (int cal_int = 0; cal_int < NUM_CAL ; cal_int ++){  //Iterate 2000 times
     //if(cal_int % 125 == 0)Serial.print(".");            //Print a dot every 125 readings
@@ -55,13 +55,13 @@ void cal_mpu(){            //Subroutine for callibrating MPU6050
     for (int i = 0; i < 3; i++) {
       gyro_cal[i] += gyro[i];
     }
-    acc_cal.val_float += sqrt(pow(acc[0],2)+pow(acc[1],2)+pow(acc[2],2));
+    acc_cal += sqrt(pow(acc[0],2)+pow(acc[1],2)+pow(acc[2],2));
     delay(3);                                             //Delay 3us to simulate the 250Hz program loop
   }
   for (int i = 0; i < 3; i++) {
     gyro_cal[i] /= NUM_CAL;
   }
-  acc_cal.val_float /= NUM_CAL;
+  acc_cal /= NUM_CAL;
 
   gyro_x_cal.val_float = gyro_cal[0];
   gyro_y_cal.val_float = gyro_cal[1];
@@ -81,7 +81,7 @@ void process_mpu(){
   /*
     Calculate adapative gain
   */
-  err_mag = (abs(vect_magnitude(acc))-acc_cal.val_float)/acc_cal.val_float;
+  err_mag = (abs(vect_magnitude(acc))-acc_cal)/acc_cal;
   alpha = BASE_GAIN*err_gain_factor(err_mag, THRESH_LOW, THRESH_HIGH);
 
   //Calculate global rate from local rate
@@ -129,7 +129,7 @@ void process_mpu(){
   yaw = atan2(-2*q_out[1]*q_out[2]+2*q_out[0]*q_out[3],
                  pow(q_out[0],2) + pow(q_out[1],2) -
                  pow(q_out[2],2) - pow(q_out[3],2))*RAD_TO_DEG;
-  
+
   pitch = asin(2*q_out[1]*q_out[3]+2*q_out[0]*q_out[2])*RAD_TO_DEG;
   roll  = atan2(-2*q_out[2]*q_out[3]+2*q_out[0]*q_out[1],
                 pow(q_out[3],2) - pow(q_out[2],2) -

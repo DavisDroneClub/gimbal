@@ -1,0 +1,187 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+\usepackage{graphicx}
+\graphicspath{ {figures/} }
+\usepackage{array}
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{letterpaper} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{pdfpages}
+% These packages are all incorporated in the memoir class to one degree or another...
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+\usepackage{float}
+\usepackage{amsmath}
+\input{arduinoLanguage.tex}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+\setlength{\parindent}{0pt}
+
+\setcounter{tocdepth}{2}
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+
+\title{Auto-Leveling Gimbal \\ Operation Manual}
+\author{Davis Drone Club}
+\date{\today} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+
+
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\begin{center}
+\includegraphics[width = 0.5\textwidth]{Pictures/cover.png}
+\end{center}
+
+\newpage
+\tableofcontents
+\pagenumbering{roman}
+\newpage
+\listoffigures
+\vspace{3cm}
+\begin{center}
+All documents, software, and design files can be found at the \\
+\href{https://github.com/DavisDroneClub/gimbal}{Davis Drone Club Gimbal page}.
+\end{center}
+\newpage
+\pagenumbering{arabic}
+\setlength{\parskip}{1em}
+
+\includepdf[pagecommand={}]{cad/00-00-gimbal_dimensions}
+\includepdf[pagecommand={}]{cad/00-00-gimbal_assembly}
+
+\includepdf[pages = -, pagecommand={}]{cad/assembly_instructions}
+\section{Mounting Instructions}
+
+\begin{enumerate}
+\item Remove all battery compartments or expansion bays mounted to the bottom of the aircraft.
+\item Align the gimbal such that the cutout on the metal plate is aligned with the bottom cooling fan. The gimbal can be mounted in the forward or rearward positions to adjust the center of gravity of the aircraft. 
+\item Use four M2.5x5 screws to attach the gimbal to the mounting rails. 
+\end{enumerate}
+
+\begin{figure}[H]
+\begin{centering}
+\includegraphics[width = 0.75\textwidth]{Pictures/matrice_mount.png}
+\caption{Gimbal mounted to the Matrice 100}
+\label{fig:mount}
+\end{centering}
+\end{figure}
+\begin{figure}[H]
+\begin{centering}
+\includegraphics[width = 0.6\textwidth]{Pictures/fan_cutout.png}
+\caption{Fan cutout alignment}
+\label{fig:fan}
+\end{centering}
+\end{figure}
+
+\section{Wiring Guide}
+The gimbal can be operated from the Matrice power system through a BEC module. The gimbal board can take the power from a single BEC connector and distribute it to the servo motor, and attached camera. 
+\begin{figure}[H]
+\begin{centering}
+\includegraphics[width = 0.9\textwidth]{Pictures/power_connectors.png}
+\caption{Power and servo connectors}
+\label{fig:pwr_con}
+\end{centering}
+\end{figure}
+
+When viewed in a orientation as shown in Figure \ref{fig:pwr_con}, the top right connector is the connector for the servo motor. The wire must be attached with the brown wire facing the middle of the board. The next connector, on the bottom right of the board, is the power input to the board from the BEC. The wire must also be attached with the brown wire facing the middle of the board, reversed from the servo connector. Finally, the mini-USB connector on the left hand side of the blue board is used for uploading firmware, and can also be used to power the gimbal for testing purposes. 
+\begin{figure}[H]
+\begin{centering}
+\includegraphics[width = 0.55\textwidth]{Pictures/power.jpg}
+\caption{Servo connector}
+\label{fig:pwr}
+\end{centering}
+\end{figure}
+
+The IMU is connected to the electronics board using a removable, four wire cable. The pins for the IMU are located on the bottom of the electronics board, under the USB connector. The cable should be connected with the blue markings facing away from the gimbal plate, as shown in Figure \ref{fig:imu}
+
+\begin{figure}[H]
+\begin{centering}
+\includegraphics[width = 0.55\textwidth]{Pictures/nano_imu.jpg}
+\caption{IMU connection}
+\label{fig:imu}
+\end{centering}
+\end{figure}
+
+To power the RedEdge of Sequoia cameras, an appropriate camera power to JR connector cable can be used with the power bypass cable (blue) on the gimbal electronics board. While the USB port can power to the power bypass, a BEC should be used when drawing significant current.  
+
+\newpage
+\section{Firmware Update Procedure}
+The Arduino IDE and drivers are used to upload code to the gimbal. Instructions for installing the IDE and drivers for Windows, Mac, and Linux can be found at the \href{https://www.arduino.cc/en/Main/Software}{Arduino website}.
+
+\begin{enumerate}
+\item Download the gimbal code at \href{https://github.com/DavisDroneClub/gimbal/raw/master/code.zip}{this} link.
+\item Unzip the folder, and open the ``code.ino'' file with the Arduino IDE.
+\item Connect the gimbal to the computer using a mini-USB cable.
+\item Under ``Tools'', change the board to ``Arduino Nano'' and select the port labeled with ``Arduino''. (Port numbers may vary across different computers)
+\begin{figure}[H]
+\begin{centering}
+\subfloat[Board Selection]{\includegraphics[width = 0.4\textwidth]{Pictures/board.png}} \qquad
+\subfloat[Port Selection]{\includegraphics[width = 0.4\textwidth]{Pictures/com.png}}
+\caption{Configuring the Arduino IDE}
+\end{centering}
+\end{figure}
+\item With the gimbal connected, press the ``Upload'' button on the upper left hand corner of the IDE screen.
+\end{enumerate}
+
+\section{Troubleshooting}
+\begin{enumerate}
+\item \textbf{Servo motor is making strange sounds when powered up:} Check to see if the servo connector is connected the right way.
+\item \textbf{Camera plate is stuck in single position:} Press reset button on top of the blue board. 
+\item \textbf{Camera plate moves to extreme position at startup:} Gimbal mode may be set incorrectly.
+\end{enumerate}
+\end{document}
